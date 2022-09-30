@@ -88,10 +88,13 @@ def main():
             env.render()
 
     
+    import os
+    directory = '/data/maze2d'
+    os.makedirs(directory, exist_ok=True)
     if args.noisy:
-        fname = '%s-noisy.hdf5' % args.env_name
+        fname = os.path.join(directory, '%s-noisy.hdf5' % args.env_name)
     else:
-        fname = '%s.hdf5' % args.env_name
+        fname = os.path.join(directory, '%s.hdf5' % args.env_name)
     dataset = h5py.File(fname, 'w')
     npify(data)
     for k in data:

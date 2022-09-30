@@ -152,6 +152,20 @@ OPEN = \
         "#OOOOO#\\"+\
         "#######"
 
+U_MAZE2 = \
+        "#####\\"+\
+        "#GOO#\\"+\
+        "###O#\\"+\
+        "#OOO#\\"+\
+        "#####"
+
+U_MAZE2_MIRROR = \
+        "#####\\"+\
+        "#OOG#\\"+\
+        "#O###\\"+\
+        "#OOO#\\"+\
+        "#####"
+
 
 class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
     def __init__(self,

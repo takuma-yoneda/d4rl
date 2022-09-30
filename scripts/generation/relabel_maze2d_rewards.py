@@ -8,20 +8,24 @@ import h5py
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='SAC-BEAR')
-    parser.add_argument('--maze', default='umaze', help='')
+    parser.add_argument('--maze', default='U_MAZE', help='')
     parser.add_argument('--relabel_type', default='dense', help='')
     parser.add_argument('--filename', type=str)
     args = parser.parse_args()
 
+    maze = getattr(maze_model, args.maze, None)
+    if maze is None:
+        raise ValueError(f'given maze {args.maze} is not found in d4rl/pointmaze/maze_model.py')
 
-    if args.maze == 'umaze':
-        maze = maze_model.U_MAZE
-    elif args.maze == 'open':
-        maze = maze_model.OPEN
-    elif args.maze == 'medium':
-        maze = maze_model.MEDIUM_MAZE
-    else:
-        maze = maze_model.LARGE_MAZE
+    # if args.maze == 'umaze':
+    #     maze = maze_model.U_MAZE
+    # elif args.maze == 'open':
+    #     maze = maze_model.OPEN
+    # elif args.maze == 'medium':
+    #     maze = maze_model.MEDIUM_MAZE
+    # else:
+    #     maze = maze_model.LARGE_MAZE
+
     env = MazeEnv(maze, reset_target=False, reward_type='sparse')
     target_goal = env._target
 
