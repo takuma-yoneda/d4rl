@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import gym
 import logging
 from d4rl.pointmaze import waypoint_controller
@@ -8,43 +9,17 @@ import gzip
 import h5py
 import argparse
 
+from .generate_maze2d_datasets import reset_data, append_data, npify
 
-def reset_data():
-    return {'observations': [],
-            'actions': [],
-            'terminals': [],
-            'rewards': [],
-            'infos/goal': [],
-            'infos/qpos': [],
-            'infos/qvel': [],
-            }
-
-def append_data(data, s, a, tgt, done, env_data):
-    data['observations'].append(s)
-    data['actions'].append(a)
-    data['rewards'].append(0.0)
-    data['terminals'].append(done)
-    data['infos/goal'].append(tgt)
-    data['infos/qpos'].append(env_data.qpos.ravel().copy())
-    data['infos/qvel'].append(env_data.qvel.ravel().copy())
-
-def npify(data):
-    for k in data:
-        if k == 'terminals':
-            dtype = np.bool_
-        else:
-            dtype = np.float32
-
-        data[k] = np.array(data[k], dtype=dtype)
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--render', action='store_true', help='Render trajectories')
     parser.add_argument('--noisy', action='store_true', help='Noisy actions')
-    parser.add_argument('--env_name', type=str, default='maze2d-umaze-v1', help='Maze type')
+    parser.add_argument('--env_name', type=str, default='maze2d-funnel-v0', help='Maze type')
     parser.add_argument('--num_samples', type=int, default=int(1e6), help='Num samples to collect')
     args = parser.parse_args()
-    assert 'funnel' not in args.env_name, 'Use generate_maze2d_funnel_dataset.py in stead!'
+    assert 'funnel' in args.env_name
 
     env = gym.make(args.env_name)
     maze = env.str_maze_spec
@@ -53,8 +28,17 @@ def main():
     controller = waypoint_controller.WaypointController(maze)
     env = maze_model.MazeEnv(maze)
 
-    env.set_target()
-    s = env.reset()
+    def wrapped_reset():
+        # env.empty_and_goal_locations is a list of tuple (list of positions)
+        # Format is (x, y) where x goes down and y goes to the right
+        prev_array = env.empty_and_goal_locations.copy()
+        new_array = [loc for loc in env.empty_and_goal_locations if loc[0] < 3]
+        env.empty_and_goal_locations = new_array
+        obs = env.reset()
+        env.empty_and_goal_locations = prev_array
+        return obs
+
+    s = wrapped_reset()
     act = env.action_space.sample()
     done = False
 
@@ -79,7 +63,7 @@ def main():
 
         ts += 1
         if done:
-            env.set_target()
+            s = wrapped_reset()
             done = False
             ts = 0
         else:
@@ -88,7 +72,7 @@ def main():
         if args.render:
             env.render()
 
-    
+
     import os
     directory = '/data/maze2d'
     os.makedirs(directory, exist_ok=True)
