@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 import gym
-import logging
 from d4rl.pointmaze import waypoint_controller
 from d4rl.pointmaze import maze_model
 import numpy as np
-import pickle
-import gzip
 import h5py
 import argparse
 

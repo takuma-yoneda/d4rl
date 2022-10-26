@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+from typing import Callable
 import numpy as np
 import einops
 import imageio
@@ -98,6 +99,31 @@ class MazeRenderer:
         img = plot2img(fig, remove_margins=self._remove_margins)
         return img
 
+    def render_multiple(self, trajectories, title=None, updated_background=None, alpha=0.6, colormap: Callable = plt.cm.Greens):
+        """Render multiple trajectories on the same image"""
+        plt.clf()
+        fig = plt.gcf()
+        fig.set_size_inches(5, 5)
+        if updated_background is not None:
+            _background = updated_background
+        else:
+            _background = self._background
+        plt.imshow(_background * .5,
+            extent=self._extent, cmap=plt.cm.binary, vmin=0, vmax=1)
+
+        for idx, observations in enumerate(trajectories):
+            path_length = len(observations)
+            # colors = plt.cm.jet(np.linspace(0,1,path_length))
+            colors = colormap(np.linspace(0,1,path_length))  # Let's try Greens. Other colors: (https://matplotlib.org/stable/tutorials/colors/colormaps.html)
+            # plt.plot(observations[:,1], observations[:,0], c='black', zorder=10)
+            plt.scatter(observations[:,1], observations[:,0], c=colors, zorder=20 + idx, alpha=alpha, label=idx)
+
+        plt.axis('off')
+        plt.title(title)
+        img = plot2img(fig, remove_margins=self._remove_margins)
+        return img
+
+
     def composite(self, savepath, paths, ncol=5, **kwargs):
         '''
             savepath : str
@@ -161,6 +187,23 @@ class Maze2dRenderer(MazeRenderer):
             conditions /= scale
         return super().renders(observations, conditions, **kwargs)
 
+    def render_multiple(self, trajectories, title=None, updated_background=None, alpha=0.6, colormap: Callable = plt.cm.Greens):
+        for idx in range(len(trajectories)):
+            observations = trajectories[idx]
+            observations = observations + .5
+            if len(self.bounds) == 2:
+                _, scale = self.bounds
+                observations /= scale
+            elif len(self.bounds) == 4:
+                _, iscale, _, jscale = self.bounds
+                observations[:, 0] /= iscale
+                observations[:, 1] /= jscale
+            else:
+                raise RuntimeError(f'Unrecognized bounds for {self.env}: {self.bounds}')
+            trajectories[idx] = observations
+
+        return super().render_multiple(trajectories, title=title, updated_background=updated_background, alpha=alpha, colormap=colormap)
+
 #-----------------------------------------------------------------------------#
 #---------------------------------- rollouts ---------------------------------#
 #-----------------------------------------------------------------------------#
@@ -219,6 +262,9 @@ def main(env_name, h5path, outdir, num_episodes, min_traj_len=10):
     print(f'There are {len(terminal_steps)} episodes in the dataset!')
     prev_term_step = 0
     counter = 0
+
+    # Extract valid episodes
+    episodes = []
     for term_step in terminal_steps:
         term_step = term_step + 1  # Why??
         if term_step - prev_term_step < min_traj_len:
@@ -227,14 +273,23 @@ def main(env_name, h5path, outdir, num_episodes, min_traj_len=10):
             continue
 
         ep = dataset['observations'][prev_term_step:term_step]
-        img = renderer.renders(ep)  # shape: (500 , 500, 4) (RGBA?)
-        Image.fromarray(img).save(Path(outdir) / f'ep_{counter:04d}.png')
+        episodes.append(ep)
 
         prev_term_step = term_step
         counter += 1
 
         if counter == num_episodes:
             break
+
+    # Render each episode
+    for ep in episodes:
+        img = renderer.renders(ep)  # shape: (500 , 500, 4) (RGBA?)
+        Image.fromarray(img).save(Path(outdir) / f'ep_{counter:04d}.png')
+
+    # Render all episodes on a single image
+    img = renderer.render_multiple(episodes[:10])
+    Image.fromarray(img).save(Path(outdir) / f'ep_all.png')
+
 
 if __name__ == "__main__":
     import argparse
