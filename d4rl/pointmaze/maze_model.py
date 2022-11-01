@@ -290,6 +290,7 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
 
 
 class FunnelGoalMazeEnv(MazeEnv):
+    goal_locs = {'north': (1, 4), 'east': (4, 7), 'south': (7, 4), 'west': (4, 1)}
     def __init__(self,
                  maze_spec=FUNNEL_MULTI_GOAL,
                  reward_type='dense',
@@ -298,13 +299,11 @@ class FunnelGoalMazeEnv(MazeEnv):
                  **kwargs):
         offline_env.OfflineEnv.__init__(self, **kwargs)
 
+        print('Goal is set to', goal)
+
         assert not reset_target
         assert goal in ['north', 'east', 'south', 'west']
-        goal_locs = {'north': (1, 4), 'east': (4, 1), 'south': (7, 4), 'west': (4, 7)}
-        self.goal_locs = goal_locs
 
-        reward_type = 'sparse'
-        maze_spec = FUNNEL_MULTI_GOAL
         self.reset_target = False
         self.str_maze_spec = maze_spec
         self.maze_arr = parse_maze(maze_spec)
@@ -322,10 +321,10 @@ class FunnelGoalMazeEnv(MazeEnv):
         # Set the default goal (overriden by a call to set_target)
         # Try to find a goal if it exists
         self.goal_locations = list(zip(*np.where(self.maze_arr == GOAL)))
-        assert goal_locs[goal] in self.goal_locations
+        assert self.goal_locs[goal] in self.goal_locations
 
         # If no goal, use the first empty tile
-        self.set_target(np.array(goal_locs[goal]).astype(self.observation_space.dtype))
+        self.set_target(np.array(self.goal_locs[goal]).astype(self.observation_space.dtype))
 
         # HACK: remove goal from this, as the initial location is sampled from this list
         self.empty_and_goal_locations = self.reset_locations
