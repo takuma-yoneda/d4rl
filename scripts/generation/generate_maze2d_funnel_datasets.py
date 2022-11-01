@@ -13,7 +13,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--render', action='store_true', help='Render trajectories')
     parser.add_argument('--noisy', action='store_true', help='Noisy actions')
-    parser.add_argument('--env_name', type=str, default='maze2d-funnel-v0', help='Maze type')
+    parser.add_argument('--env_name', type=str, default='maze2d-funnel-v1', help='Maze type')
     parser.add_argument('--num_samples', type=int, default=int(1e6), help='Num samples to collect')
     args = parser.parse_args()
     assert 'funnel' in args.env_name
@@ -23,7 +23,7 @@ def main():
     max_episode_steps = env._max_episode_steps
 
     controller = waypoint_controller.WaypointController(maze)
-    env = maze_model.MazeEnv(maze)
+    env = maze_model.MazeEnv(maze, reward_type='sparse')
 
     def wrapped_reset():
         # env.empty_and_goal_locations is a list of tuple (list of positions)
@@ -41,7 +41,7 @@ def main():
 
     data = reset_data()
     ts = 0
-    for _ in range(args.num_samples):
+    for i in range(args.num_samples):
         position = s[0:2]
         velocity = s[2:4]
         act, done = controller.get_action(position, velocity, env._target)
@@ -53,10 +53,16 @@ def main():
             done = True
         append_data(data, s, act, env._target, done, env.sim.data)
 
-        ns, _, _, _ = env.step(act)
+        ns, rew, _, _ = env.step(act)
 
         if len(data['observations']) % 10000 == 0:
             print(len(data['observations']))
+
+        # NOTE: Assuming sparse reward, terminate the episode when non-zero reward is given!
+        if rew > 0:
+            print('step', i, 'rew', rew)
+            data['terminals'][-1] = True  # HACK
+            done = True
 
         ts += 1
         if done:

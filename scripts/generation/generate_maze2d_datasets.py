@@ -43,6 +43,7 @@ def main():
     parser.add_argument('--noisy', action='store_true', help='Noisy actions')
     parser.add_argument('--env_name', type=str, default='maze2d-umaze-v1', help='Maze type')
     parser.add_argument('--num_samples', type=int, default=int(1e6), help='Num samples to collect')
+    parser.add_argument('--terminate-at-goal', action='store_true', help='Whether to terminate when the agent reaches goal')
     args = parser.parse_args()
     assert 'funnel' not in args.env_name, 'Use generate_maze2d_funnel_dataset.py in stead!'
 

@@ -175,6 +175,28 @@ FUNNEL = \
         '###G###\\'+\
         "#######"
 
+FUNNEL2 = \
+        '#######\\'+\
+        '#OOOOO#\\'+\
+        '#OOOOO#\\'+\
+        '#OOOOO#\\'+\
+        '#OOOOO#\\'+\
+        '#OOOOO#\\'+\
+        '###G###\\'+\
+        "#######"
+
+FUNNEL_MULTI_GOAL = \
+        '#########\\'+\
+        '####G####\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '#GOOOOOG#\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '####G####\\'+\
+        "#########"
+
+
 
 class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
     def __init__(self,
@@ -266,3 +288,44 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
     def viewer_setup(self):
         pass
 
+
+class FunnelGoalMazeEnv(MazeEnv):
+    def __init__(self,
+                 maze_spec=FUNNEL_MULTI_GOAL,
+                 reward_type='dense',
+                 reset_target=False,
+                 goal='south',
+                 **kwargs):
+        offline_env.OfflineEnv.__init__(self, **kwargs)
+
+        assert not reset_target
+        assert goal in ['north', 'east', 'south', 'west']
+        goal_locs = {'north': (1, 4), 'east': (4, 1), 'south': (7, 4), 'west': (4, 7)}
+        self.goal_locs = goal_locs
+
+        reward_type = 'sparse'
+        maze_spec = FUNNEL_MULTI_GOAL
+        self.reset_target = False
+        self.str_maze_spec = maze_spec
+        self.maze_arr = parse_maze(maze_spec)
+        self.reward_type = reward_type
+        self.reset_locations = list(zip(*np.where(self.maze_arr == EMPTY)))
+        self.reset_locations.sort()
+
+        self._target = np.array([0.0,0.0])
+
+        model = point_maze(maze_spec)
+        with model.asfile() as f:
+            mujoco_env.MujocoEnv.__init__(self, model_path=f.name, frame_skip=1)
+        utils.EzPickle.__init__(self)
+
+        # Set the default goal (overriden by a call to set_target)
+        # Try to find a goal if it exists
+        self.goal_locations = list(zip(*np.where(self.maze_arr == GOAL)))
+        assert goal_locs[goal] in self.goal_locations
+
+        # If no goal, use the first empty tile
+        self.set_target(np.array(goal_locs[goal]).astype(self.observation_space.dtype))
+
+        # HACK: remove goal from this, as the initial location is sampled from this list
+        self.empty_and_goal_locations = self.reset_locations
