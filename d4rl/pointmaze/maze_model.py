@@ -296,6 +296,8 @@ class FunnelGoalMazeEnv(MazeEnv):
                  reward_type='dense',
                  reset_target=False,
                  goal='south',
+                 terminate_at_goal=False,
+                 terminate_at_any_goal=False,
                  **kwargs):
         offline_env.OfflineEnv.__init__(self, **kwargs)
 
@@ -313,6 +315,9 @@ class FunnelGoalMazeEnv(MazeEnv):
 
         self._target = np.array([0.0,0.0])
 
+        self.terminate_at_goal = terminate_at_goal
+        self.terminate_at_any_goal = terminate_at_any_goal
+
         model = point_maze(maze_spec)
         with model.asfile() as f:
             mujoco_env.MujocoEnv.__init__(self, model_path=f.name, frame_skip=1)
@@ -328,3 +333,16 @@ class FunnelGoalMazeEnv(MazeEnv):
 
         # HACK: remove goal from this, as the initial location is sampled from this list
         self.empty_and_goal_locations = self.reset_locations
+
+    def step(self, action):
+        goal_threshold = 0.5
+        obs, rew, done, info = super().step(action)
+        pos = obs[0:2]
+        if self.terminate_at_goal:
+            done = done or (np.linalg.norm(pos - self._target) <= goal_threshold)
+
+        if self.terminate_at_any_goal:
+            for goal_loc in self.goal_locs.values():
+                done = done or (np.linalg.norm(pos - goal_loc) <= goal_threshold)
+
+        return obs, rew, done, info

@@ -25,7 +25,7 @@ def main(directory):
 
     for goal in ['north', 'east', 'south', 'west']:
         print('goal', goal)
-        env = maze_model.FunnelGoalMazeEnv(goal=goal, reward_type='sparse')
+        env = maze_model.FunnelGoalMazeEnv(goal=goal, reward_type='sparse', terminate_at_goal=True)
 
         def wrapped_reset():
             # env.empty_and_goal_locations is a list of tuple (list of positions)
