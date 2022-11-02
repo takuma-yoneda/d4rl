@@ -23,7 +23,7 @@ def main():
     max_episode_steps = env._max_episode_steps
 
     controller = waypoint_controller.WaypointController(maze)
-    env = maze_model.MazeEnv(maze, reward_type='sparse')
+    env = maze_model.MazeEnv(maze, reward_type='sparse', terminate_at_goal=True)
 
     def wrapped_reset():
         # env.empty_and_goal_locations is a list of tuple (list of positions)
@@ -49,23 +49,20 @@ def main():
             act = act + np.random.randn(*act.shape)*0.5
 
         act = np.clip(act, -1.0, 1.0)
-        if ts >= max_episode_steps:
-            done = True
         append_data(data, s, act, env._target, done, env.sim.data)
 
-        ns, rew, _, _ = env.step(act)
+        ns, rew, done, _ = env.step(act)
+
+        if ts >= max_episode_steps:
+            done = True
 
         if len(data['observations']) % 10000 == 0:
             print(len(data['observations']))
 
-        # NOTE: Assuming sparse reward, terminate the episode when non-zero reward is given!
-        if rew > 0:
-            print('step', i, 'rew', rew)
-            data['terminals'][-1] = True  # HACK
-            done = True
-
         ts += 1
         if done:
+            print(f'i: {i}\trew:{rew}')
+            data['terminals'][-1] = True  # HACK
             s = wrapped_reset()
             done = False
             ts = 0

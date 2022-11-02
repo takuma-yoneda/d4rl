@@ -203,6 +203,7 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
                  maze_spec=U_MAZE,
                  reward_type='dense',
                  reset_target=False,
+                 terminate_at_goal=False,
                  **kwargs):
         offline_env.OfflineEnv.__init__(self, **kwargs)
 
@@ -212,8 +213,9 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
         self.reward_type = reward_type
         self.reset_locations = list(zip(*np.where(self.maze_arr == EMPTY)))
         self.reset_locations.sort()
+        self.terminate_at_goal = terminate_at_goal
 
-        self._target = np.array([0.0,0.0])
+        self._target = np.array([-100.0, -100.0])  # Make sure the initial pos never acheive the goal
 
         model = point_maze(maze_spec)
         with model.asfile() as f:
@@ -245,6 +247,12 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
         else:
             raise ValueError('Unknown reward type %s' % self.reward_type)
         done = False
+
+        pos = ob[0:2]
+        goal_threshold = 0.5
+        if self.terminate_at_goal:
+            done = done or (np.linalg.norm(pos - self._target) <= goal_threshold)
+
         return ob, reward, done, {}
 
     def _get_obs(self):
