@@ -337,11 +337,14 @@ class FunnelGoalMazeEnv(MazeEnv):
             self.reset_locations = list(zip(*np.where(self.maze_arr == EMPTY)))
             self.reset_locations.sort()
 
-        self._target = np.array([0.0,0.0])
 
         self.terminate_at_goal = terminate_at_goal
         self.terminate_at_any_goal = terminate_at_any_goal
 
+        # NOTE: self._target is referred inside mujoco_env.MujocoEnv.__init__
+        # as it executes step(action) internally, which checks the diff between current pos and self._target.
+        # Due to this, if self._target is close to ([0., 0.]) it immediately exits.
+        self._target = np.array([-999.,-999.])
         model = point_maze(maze_spec)
         with model.asfile() as f:
             mujoco_env.MujocoEnv.__init__(self, model_path=f.name, frame_skip=1)
@@ -375,4 +378,4 @@ class FunnelGoalMazeEnv(MazeEnv):
 class SimpleMultiGoalMazeEnv(FunnelGoalMazeEnv):
     goal_locs = {'left': (7, 2), 'center': (7, 4), 'right': (7, 6)}
     def __init__(self, maze_spec=SIMPLE_MULTI_GOAL, reward_type='dense', reset_target=False, goal='center', terminate_at_goal=False, terminate_at_any_goal=False, **kwargs):
-        super().__init__(maze_spec=maze_spec, reward_type=reward_type, reset_target=reset_target, goal=goal, terminate_at_goal=terminate_at_goal, terminate_at_any_goal=terminate_at_any_goal, **kwargs)
+        super().__init__(maze_spec=maze_spec, reward_type=reward_type, reset_target=reset_target, goal=goal, terminate_at_goal=terminate_at_goal, terminate_at_any_goal=terminate_at_any_goal, start_loc=(2, 4), **kwargs)
