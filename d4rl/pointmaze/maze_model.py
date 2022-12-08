@@ -372,7 +372,7 @@ class FunnelGoalMazeEnv(MazeEnv):
         return obs, rew, done, info
 
 
-class SimpleMultiGoalMaze(FunnelGoalMazeEnv):
+class SimpleMultiGoalMazeEnv(FunnelGoalMazeEnv):
     goal_locs = {'left': (7, 2), 'center': (7, 4), 'right': (7, 6)}
     def __init__(self, maze_spec=SIMPLE_MULTI_GOAL, reward_type='dense', reset_target=False, goal='center', terminate_at_goal=False, terminate_at_any_goal=False, **kwargs):
         super().__init__(maze_spec=maze_spec, reward_type=reward_type, reset_target=reset_target, goal=goal, terminate_at_goal=terminate_at_goal, terminate_at_any_goal=terminate_at_any_goal, **kwargs)

@@ -1,4 +1,4 @@
-from .maze_model import FUNNEL, FUNNEL2, FUNNEL_MULTI_GOAL, SIMPLE_MULTI_GOAL, SimpleMultiGoalMaze, FunnelGoalMazeEnv, MazeEnv, OPEN, U_MAZE, MEDIUM_MAZE, LARGE_MAZE, U_MAZE_EVAL, MEDIUM_MAZE_EVAL, LARGE_MAZE_EVAL, U_MAZE2, U_MAZE2_MIRROR
+from .maze_model import FUNNEL, FUNNEL2, FUNNEL_MULTI_GOAL, SIMPLE_MULTI_GOAL, SimpleMultiGoalMazeEnv, FunnelGoalMazeEnv, MazeEnv, OPEN, U_MAZE, MEDIUM_MAZE, LARGE_MAZE, U_MAZE_EVAL, MEDIUM_MAZE_EVAL, LARGE_MAZE_EVAL, U_MAZE2, U_MAZE2_MIRROR
 from gym.envs.registration import register
 
 register(
@@ -364,7 +364,7 @@ register(
 
 register(
     id='maze2d-simple-multi-goal-v0',
-    entry_point='d4rl.pointmaze:SimpleMultiGoalMaze',
+    entry_point='d4rl.pointmaze:SimpleMultiGoalMazeEnv',
     max_episode_steps=600,
     kwargs={
         'maze_spec':SIMPLE_MULTI_GOAL,
