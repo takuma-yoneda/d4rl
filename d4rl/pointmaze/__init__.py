@@ -1,4 +1,4 @@
-from .maze_model import FUNNEL, FUNNEL2, FUNNEL_MULTI_GOAL, FunnelGoalMazeEnv, MazeEnv, OPEN, U_MAZE, MEDIUM_MAZE, LARGE_MAZE, U_MAZE_EVAL, MEDIUM_MAZE_EVAL, LARGE_MAZE_EVAL, U_MAZE2, U_MAZE2_MIRROR
+from .maze_model import FUNNEL, FUNNEL2, FUNNEL_MULTI_GOAL, SIMPLE_MULTI_GOAL, SimpleMultiGoalMaze, FunnelGoalMazeEnv, MazeEnv, OPEN, U_MAZE, MEDIUM_MAZE, LARGE_MAZE, U_MAZE_EVAL, MEDIUM_MAZE_EVAL, LARGE_MAZE_EVAL, U_MAZE2, U_MAZE2_MIRROR
 from gym.envs.registration import register
 
 register(
@@ -297,8 +297,8 @@ register(
         'maze_spec':U_MAZE2,
         'reward_type':'sparse',
         'reset_target': False,
-        # 'ref_min_score': 0.94,
-        # 'ref_max_score': 62.6,
+        'ref_min_score': 0.94,
+        'ref_max_score': 62.6,
         # 'dataset_url':'http://rail.eecs.berkeley.edu/datasets/offline_rl/maze2d/maze2d-umaze-sparse.hdf5'
     }
 )
@@ -311,8 +311,8 @@ register(
         'maze_spec':U_MAZE2_MIRROR,
         'reward_type':'sparse',
         'reset_target': False,
-        # 'ref_min_score': 0.94,
-        # 'ref_max_score': 62.6,
+        'ref_min_score': 0.94,
+        'ref_max_score': 62.6,
         # 'dataset_url':'http://rail.eecs.berkeley.edu/datasets/offline_rl/maze2d/maze2d-umaze-sparse.hdf5'
     }
 )
@@ -353,6 +353,21 @@ register(
     max_episode_steps=600,
     kwargs={
         'maze_spec':FUNNEL_MULTI_GOAL,
+        # Below is copied from MEDIUM_MAZE_EVAL
+        'reward_type':'sparse',
+        'reset_target': False,
+        'ref_min_score': 5.77,
+        'ref_max_score': 85.14,
+        # 'dataset_url':'http://rail.eecs.berkeley.edu/datasets/offline_rl/maze2d/maze2d-medium-sparse.hdf5'
+    }
+)
+
+register(
+    id='maze2d-simple-multi-goal-v0',
+    entry_point='d4rl.pointmaze:SimpleMultiGoalMaze',
+    max_episode_steps=600,
+    kwargs={
+        'maze_spec':SIMPLE_MULTI_GOAL,
         # Below is copied from MEDIUM_MAZE_EVAL
         'reward_type':'sparse',
         'reset_target': False,

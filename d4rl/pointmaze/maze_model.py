@@ -196,6 +196,16 @@ FUNNEL_MULTI_GOAL = \
         '####G####\\'+\
         "#########"
 
+SIMPLE_MULTI_GOAL = \
+        '#########\\'+\
+        '#########\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '##G#G#G##\\'+\
+        "#########"
 
 
 class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
@@ -306,20 +316,26 @@ class FunnelGoalMazeEnv(MazeEnv):
                  goal='south',
                  terminate_at_goal=False,
                  terminate_at_any_goal=False,
+                 start_loc=None,
                  **kwargs):
         offline_env.OfflineEnv.__init__(self, **kwargs)
 
         print('Goal is set to', goal)
 
         assert not reset_target
-        assert goal in ['north', 'east', 'south', 'west']
+        assert goal in self.goal_locs.keys()
 
         self.reset_target = False
         self.str_maze_spec = maze_spec
         self.maze_arr = parse_maze(maze_spec)
         self.reward_type = reward_type
-        self.reset_locations = list(zip(*np.where(self.maze_arr == EMPTY)))
-        self.reset_locations.sort()
+
+        self.start_loc = start_loc
+        if start_loc is not None:
+            self.reset_locations = [start_loc]
+        else:
+            self.reset_locations = list(zip(*np.where(self.maze_arr == EMPTY)))
+            self.reset_locations.sort()
 
         self._target = np.array([0.0,0.0])
 
@@ -354,3 +370,9 @@ class FunnelGoalMazeEnv(MazeEnv):
                 done = done or (np.linalg.norm(pos - goal_loc) <= goal_threshold)
 
         return obs, rew, done, info
+
+
+class SimpleMultiGoalMaze(FunnelGoalMazeEnv):
+    goal_locs = {'left': (7, 2), 'center': (7, 4), 'right': (7, 6)}
+    def __init__(self, maze_spec=SIMPLE_MULTI_GOAL, reward_type='dense', reset_target=False, goal='center', terminate_at_goal=False, terminate_at_any_goal=False, **kwargs):
+        super().__init__(maze_spec=maze_spec, reward_type=reward_type, reset_target=reset_target, goal=goal, terminate_at_goal=terminate_at_goal, terminate_at_any_goal=terminate_at_any_goal, **kwargs)

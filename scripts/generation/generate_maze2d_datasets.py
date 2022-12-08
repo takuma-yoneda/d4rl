@@ -52,7 +52,7 @@ def main():
     max_episode_steps = env._max_episode_steps
 
     controller = waypoint_controller.WaypointController(maze)
-    env = maze_model.MazeEnv(maze)
+    # env = maze_model.MazeEnv(maze)
 
     env.set_target()
     s = env.reset()
