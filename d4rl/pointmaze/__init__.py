@@ -1,4 +1,4 @@
-from .maze_model import FUNNEL, FUNNEL2, FUNNEL_MULTI_GOAL, SIMPLE_MULTI_GOAL, SIMPLE_TWO_GOALS, SimpleMultiGoalMazeEnv, FunnelGoalMazeEnv, MazeEnv, OPEN, U_MAZE, MEDIUM_MAZE, LARGE_MAZE, U_MAZE_EVAL, MEDIUM_MAZE_EVAL, LARGE_MAZE_EVAL, U_MAZE2, U_MAZE2_MIRROR
+from .maze_model import FUNNEL, FUNNEL2, FUNNEL_MULTI_GOAL, SIMPLE_MULTI_GOAL, SIMPLE_TWO_GOALS, SimpleMultiGoalMazeEnv, SimpleTwoGoalsMazeEnv, FunnelGoalMazeEnv, MazeEnv, OPEN, U_MAZE, MEDIUM_MAZE, LARGE_MAZE, U_MAZE_EVAL, MEDIUM_MAZE_EVAL, LARGE_MAZE_EVAL, U_MAZE2, U_MAZE2_MIRROR
 from gym.envs.registration import register
 
 register(
