@@ -207,6 +207,16 @@ SIMPLE_MULTI_GOAL = \
         '##G#G#G##\\'+\
         "#########"
 
+SIMPLE_TWO_GOALS = \
+        '#########\\'+\
+        '#########\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '##G###G##\\'+\
+        "#########"
 
 class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
     def __init__(self,
@@ -379,3 +389,8 @@ class SimpleMultiGoalMazeEnv(FunnelGoalMazeEnv):
     goal_locs = {'left': (7, 2), 'center': (7, 4), 'right': (7, 6)}
     def __init__(self, maze_spec=SIMPLE_MULTI_GOAL, reward_type='dense', reset_target=False, goal='center', terminate_at_goal=False, terminate_at_any_goal=False, **kwargs):
         super().__init__(maze_spec=maze_spec, reward_type=reward_type, reset_target=reset_target, goal=goal, terminate_at_goal=terminate_at_goal, terminate_at_any_goal=terminate_at_any_goal, start_loc=(2, 4), **kwargs)
+
+class SimpleTwoGoalsMazeEnv(FunnelGoalMazeEnv):
+    goal_locs = {'left': (7, 2), 'right': (7, 6)}
+    def __init__(self, maze_spec=SIMPLE_TWO_GOALS, reward_type='dense', reset_target=False, goal='left', terminate_at_goal=False, terminate_at_any_goal=False, **kwargs):
+        super().__init__(maze_spec=maze_spec, reward_type=reward_type, reset_target=reset_target, goal=goal, terminate_at_goal=terminate_at_goal, terminate_at_any_goal=terminate_at_any_goal, start_loc=None, **kwargs)
