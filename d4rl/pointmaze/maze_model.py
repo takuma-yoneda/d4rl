@@ -260,6 +260,7 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
         self.do_simulation(action, self.frame_skip)
         self.set_marker()
         ob = self._get_obs()
+        info = {}
         if self.reward_type == 'sparse':
             reward = 1.0 if np.linalg.norm(ob[0:2] - self._target) <= 0.5 else 0.0
         elif self.reward_type == 'dense':
@@ -273,7 +274,9 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
         if self.terminate_at_goal:
             done = done or (np.linalg.norm(pos - self._target) <= goal_threshold)
 
-        return ob, reward, done, {}
+        info = {'target': self._target, 'dist_to_target': np.linalg.norm(pos - self._target), **info}
+
+        return ob, reward, done, info
 
     def _get_obs(self):
         return np.concatenate([self.sim.data.qpos, self.sim.data.qvel]).ravel()
@@ -335,6 +338,7 @@ class FunnelGoalMazeEnv(MazeEnv):
         assert not reset_target
         assert goal in self.goal_locs.keys()
 
+        self._goal = goal
         self.reset_target = False
         self.str_maze_spec = maze_spec
         self.maze_arr = parse_maze(maze_spec)
@@ -376,11 +380,15 @@ class FunnelGoalMazeEnv(MazeEnv):
         obs, rew, done, info = super().step(action)
         pos = obs[0:2]
         if self.terminate_at_goal:
+            info['target_reached'] = self._goal
             done = done or (np.linalg.norm(pos - self._target) <= goal_threshold)
 
         if self.terminate_at_any_goal:
-            for goal_loc in self.goal_locs.values():
-                done = done or (np.linalg.norm(pos - goal_loc) <= goal_threshold)
+            for goal_name, goal_loc in self.goal_locs.items():
+                goal_reached = (np.linalg.norm(pos - goal_loc) <= goal_threshold)
+                if goal_reached:
+                    info['target_reached'] = goal_name
+                done = done or goal_reached
 
         return obs, rew, done, info
 
