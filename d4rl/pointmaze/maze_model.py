@@ -364,6 +364,7 @@ class FunnelGoalMazeEnv(MazeEnv):
                  terminate_at_goal=False,
                  terminate_at_any_goal=False,
                  start_loc=None,
+                 bigger_goal=False,
                  **kwargs):
         offline_env.OfflineEnv.__init__(self, **kwargs)
 
@@ -372,6 +373,7 @@ class FunnelGoalMazeEnv(MazeEnv):
         assert not reset_target
         assert goal in self.goal_locs.keys()
 
+        self.bigger_goal = bigger_goal
         self._goal = goal
         self.reset_target = False
         self.str_maze_spec = maze_spec
@@ -411,15 +413,20 @@ class FunnelGoalMazeEnv(MazeEnv):
 
     def step(self, action):
         goal_threshold = 0.5
+        offset = np.array([0., 0.])
+        if self.bigger_goal:
+            goal_threshold += 0.2
+            offset = np.array([0.2, 0.])
+
         obs, rew, done, info = super().step(action)
         pos = obs[0:2]
         if self.terminate_at_goal:
             info['target_reached'] = self._goal
-            done = done or (np.linalg.norm(pos - self._target) <= goal_threshold)
+            done = done or (np.linalg.norm(pos - (self._target + offset)) <= goal_threshold)
 
         if self.terminate_at_any_goal:
             for goal_name, goal_loc in self.goal_locs.items():
-                goal_reached = (np.linalg.norm(pos - goal_loc) <= goal_threshold)
+                goal_reached = (np.linalg.norm(pos - (goal_loc + offset)) <= goal_threshold)
                 if goal_reached:
                     info['target_reached'] = goal_name
                 done = done or goal_reached
