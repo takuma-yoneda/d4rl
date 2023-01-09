@@ -218,6 +218,40 @@ SIMPLE_TWO_GOALS = \
         '##G###G##\\'+\
         "#########"
 
+SIMPLE_TWO_GOALS2 = \
+        '#########\\'+\
+        '#########\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '###G#G###\\'+\
+        "#########"
+
+SIMPLE_TWO_GOALS3 = \
+        '#########\\'+\
+        '#########\\'+\
+        '#OOOOOOO#\\'+\
+        '#OOOOOOO#\\'+\
+        '#OOOOOOO#\\'+\
+        '#OOOOOOO#\\'+\
+        '#O#O#O#O#\\'+\
+        '###G#G###\\'+\
+        "#########"
+
+SIMPLE_CHOKE = \
+        '#########\\'+\
+        '#########\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '###O#####\\'+\
+        '##OOOOO##\\'+\
+        '##OOOOO##\\'+\
+        '#####G###\\'+\
+        "#########"
+
+
 class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
     def __init__(self,
                  maze_spec=U_MAZE,
@@ -399,6 +433,21 @@ class SimpleMultiGoalMazeEnv(FunnelGoalMazeEnv):
         super().__init__(maze_spec=maze_spec, reward_type=reward_type, reset_target=reset_target, goal=goal, terminate_at_goal=terminate_at_goal, terminate_at_any_goal=terminate_at_any_goal, start_loc=(2, 4), **kwargs)
 
 class SimpleTwoGoalsMazeEnv(FunnelGoalMazeEnv):
+    """maze2d-simple-two-goals-v0"""
     goal_locs = {'left': (7, 2), 'right': (7, 6)}
     def __init__(self, maze_spec=SIMPLE_TWO_GOALS, reward_type='dense', reset_target=False, goal='left', terminate_at_goal=False, terminate_at_any_goal=False, **kwargs):
         super().__init__(maze_spec=maze_spec, reward_type=reward_type, reset_target=reset_target, goal=goal, terminate_at_goal=terminate_at_goal, terminate_at_any_goal=terminate_at_any_goal, start_loc=None, **kwargs)
+
+class SimpleTwoGoalsMazeEnv2(SimpleTwoGoalsMazeEnv):
+    """maze2d-simple-two-goals-v1"""
+    goal_locs = {'left': (7, 3), 'right': (7, 5)}
+    def __init__(self, maze_spec=SIMPLE_TWO_GOALS2, **kwargs):
+        super().__init__(maze_spec=maze_spec, **kwargs)
+
+class SimpleTwoGoalsMazeEnv3(SimpleTwoGoalsMazeEnv):
+    """maze2d-simple-two-goals-v2"""
+    goal_locs = {'left': (7, 3), 'right': (7, 5)}
+    def __init__(self, maze_spec=SIMPLE_TWO_GOALS3, **kwargs):
+        super().__init__(maze_spec=maze_spec, **kwargs)
+
+

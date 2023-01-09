@@ -1,4 +1,25 @@
-from .maze_model import FUNNEL, FUNNEL2, FUNNEL_MULTI_GOAL, SIMPLE_MULTI_GOAL, SIMPLE_TWO_GOALS, SimpleMultiGoalMazeEnv, SimpleTwoGoalsMazeEnv, FunnelGoalMazeEnv, MazeEnv, OPEN, U_MAZE, MEDIUM_MAZE, LARGE_MAZE, U_MAZE_EVAL, MEDIUM_MAZE_EVAL, LARGE_MAZE_EVAL, U_MAZE2, U_MAZE2_MIRROR
+from .maze_model import (
+    FUNNEL,
+    FUNNEL2,
+    FUNNEL_MULTI_GOAL,
+    SIMPLE_MULTI_GOAL,
+    SIMPLE_TWO_GOALS,
+    SimpleMultiGoalMazeEnv,
+    SimpleTwoGoalsMazeEnv,
+    SimpleTwoGoalsMazeEnv2,
+    SimpleTwoGoalsMazeEnv3,
+    FunnelGoalMazeEnv,
+    MazeEnv,
+    OPEN,
+    U_MAZE,
+    MEDIUM_MAZE,
+    LARGE_MAZE,
+    U_MAZE_EVAL,
+    MEDIUM_MAZE_EVAL,
+    LARGE_MAZE_EVAL,
+    U_MAZE2,
+    U_MAZE2_MIRROR,
+)
 from gym.envs.registration import register
 
 register(
@@ -388,6 +409,32 @@ register(
         'reset_target': False,
         'ref_min_score': 5.77,
         'ref_max_score': 85.14,
+        # 'dataset_url':'http://rail.eecs.berkeley.edu/datasets/offline_rl/maze2d/maze2d-medium-sparse.hdf5'
+    }
+)
+
+register(
+    id='maze2d-simple-two-goals-v1',
+    entry_point='d4rl.pointmaze:SimpleTwoGoalsMazeEnv2',
+    max_episode_steps=600,
+    kwargs={
+        'reward_type':'sparse',
+        'reset_target': False,
+        'ref_min_score': None,
+        'ref_max_score': None,
+        # 'dataset_url':'http://rail.eecs.berkeley.edu/datasets/offline_rl/maze2d/maze2d-medium-sparse.hdf5'
+    }
+)
+
+register(
+    id='maze2d-simple-two-goals-v2',
+    entry_point='d4rl.pointmaze:SimpleTwoGoalsMazeEnv3',
+    max_episode_steps=600,
+    kwargs={
+        'reward_type':'sparse',
+        'reset_target': False,
+        'ref_min_score': None,
+        'ref_max_score': None,
         # 'dataset_url':'http://rail.eecs.berkeley.edu/datasets/offline_rl/maze2d/maze2d-medium-sparse.hdf5'
     }
 )
