@@ -365,9 +365,9 @@ class FunnelGoalMazeEnv(MazeEnv):
                  terminate_at_any_goal=False,
                  start_loc=None,
                  bigger_goal=False,
+                 init_pos_noise=0.1,
                  **kwargs):
         offline_env.OfflineEnv.__init__(self, **kwargs)
-
         print('Goal is set to', goal)
 
         assert not reset_target
@@ -411,12 +411,14 @@ class FunnelGoalMazeEnv(MazeEnv):
         # HACK: remove goal from this, as the initial location is sampled from this list
         self.empty_and_goal_locations = self.reset_locations
 
+        self.init_pos_noise = init_pos_noise
+
     def reset_model(self):
         idx = self.np_random.choice(len(self.empty_and_goal_locations))
         reset_location = np.array(self.empty_and_goal_locations[idx]).astype(self.observation_space.dtype)
 
         # NOTE: Add more noise than the original one for stratified sampling!! (0.1 -> 0.5)
-        qpos = reset_location + self.np_random.uniform(low=-.5, high=.5, size=self.model.nq)
+        qpos = reset_location + self.np_random.uniform(low=-self.init_pos_noise, high=self.init_pos_noise, size=self.model.nq)
         qvel = self.init_qvel + self.np_random.randn(self.model.nv) * .1
         self.set_state(qpos, qvel)
         if self.reset_target:
