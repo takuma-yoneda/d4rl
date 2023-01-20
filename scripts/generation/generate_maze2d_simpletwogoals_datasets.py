@@ -29,6 +29,7 @@ def main(directory):
         print('goal', goal)
         env = gym.make(env_name, goal=goal, reward_type='sparse', terminate_at_goal=True, init_pos_noise=init_pos_noise)
         # env = maze_model.SimpleTwoGoalsMazeEnv(goal=goal, reward_type='sparse', terminate_at_goal=True)
+        assert env.terminate_at_goal or env.terminate_at_any_goal
 
         def wrapped_reset():
             # env.empty_and_goal_locations is a list of tuple (list of positions)
@@ -41,7 +42,6 @@ def main(directory):
             return obs
 
         s = wrapped_reset()
-        act = env.action_space.sample()
         done = False
 
         data = reset_data()
@@ -56,7 +56,7 @@ def main(directory):
             act = np.clip(act, -1.0, 1.0)
             append_data(data, s, act, env.unwrapped._target, done, env.sim.data)
 
-            ns, rew, done, _ = env.step(act)
+            ns, rew, done, info = env.step(act)
 
             if ts >= max_episode_steps:
                 done = True
@@ -67,6 +67,13 @@ def main(directory):
             ts += 1
             if done:
                 data['terminals'][-1] = True  # HACK
+                if info.get('target_reached', '') != goal:
+                    print('warn: target not reached! Rejecting the trajectory...')
+                    # Goal is not reached for whatever reason!!
+                    # --> Remove the corresponding number of transitions!!
+                    for key in data:
+                        data[key] = data[key][-ts:]
+
                 s = wrapped_reset()
                 done = False
                 ts = 0
