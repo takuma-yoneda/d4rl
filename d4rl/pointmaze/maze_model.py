@@ -434,16 +434,13 @@ class FunnelGoalMazeEnv(MazeEnv):
 
         obs, rew, done, info = super().step(action)
         pos = obs[0:2]
-        if self.terminate_at_goal:
-            info['target_reached'] = self._goal
-            done = done or (np.linalg.norm(pos - (self._target + offset)) <= goal_threshold)
 
-        if self.terminate_at_any_goal:
-            for goal_name, goal_loc in self.goal_locs.items():
-                goal_reached = (np.linalg.norm(pos - (goal_loc + offset)) <= goal_threshold)
-                if goal_reached:
-                    info['target_reached'] = goal_name
-                done = done or goal_reached
+        _goal_locs = self.goal_locs if self.terminate_at_any_goal else {self._goal: self.goal_locs[self._goal]}
+        for goal_name, goal_loc in _goal_locs.items():
+            goal_reached = (np.linalg.norm(pos - (goal_loc + offset)) <= goal_threshold)
+            if goal_reached:
+                info['target_reached'] = goal_name
+            done = done or goal_reached
 
         return obs, rew, done, info
 

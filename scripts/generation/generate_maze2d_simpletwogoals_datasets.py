@@ -23,13 +23,13 @@ def main(directory):
     max_episode_steps = env._max_episode_steps
 
     controller = waypoint_controller.WaypointController(maze)
-    init_pos_noise = 0.5
+    init_pos_noise = 0.1
 
     for goal in ['left', 'right']:
         print('goal', goal)
         env = gym.make(env_name, goal=goal, reward_type='sparse', terminate_at_goal=True, init_pos_noise=init_pos_noise)
         # env = maze_model.SimpleTwoGoalsMazeEnv(goal=goal, reward_type='sparse', terminate_at_goal=True)
-        assert env.terminate_at_goal or env.terminate_at_any_goal
+        assert env.terminate_at_goal and not env.terminate_at_any_goal
 
         def wrapped_reset():
             # env.empty_and_goal_locations is a list of tuple (list of positions)
@@ -46,7 +46,8 @@ def main(directory):
 
         data = reset_data()
         ts = 0
-        for i in range(args.num_samples):
+        counter = 0
+        while counter < args.num_samples:
             position = s[0:2]
             velocity = s[2:4]
             act, done = controller.get_action(position, velocity, env.unwrapped._target)
@@ -71,8 +72,9 @@ def main(directory):
                     print('warn: target not reached! Rejecting the trajectory...')
                     # Goal is not reached for whatever reason!!
                     # --> Remove the corresponding number of transitions!!
+                    counter -= ts
                     for key in data:
-                        data[key] = data[key][-ts:]
+                        data[key] = data[key][:-ts]
 
                 s = wrapped_reset()
                 done = False
@@ -83,6 +85,8 @@ def main(directory):
             if args.render:
                 env.render()
 
+            counter += 1
+
 
         if args.noisy:
             fname = os.path.join(directory, f'%s-%s-noisy-initpos{init_pos_noise:.1f}.hdf5' % (env_name, goal))
@@ -91,6 +95,7 @@ def main(directory):
         dataset = h5py.File(fname, 'w')
         npify(data)
         for k in data:
+            print(f'key: {k}\t length: {len(data[k])}')
             dataset.create_dataset(k, data=data[k], compression='gzip')
 
 
