@@ -23,10 +23,11 @@ def main(directory):
     max_episode_steps = env._max_episode_steps
 
     controller = waypoint_controller.WaypointController(maze)
+    init_pos_noise = 0.5
 
     for goal in ['left', 'right']:
         print('goal', goal)
-        env = gym.make(env_name, goal=goal, reward_type='sparse', terminate_at_goal=True)
+        env = gym.make(env_name, goal=goal, reward_type='sparse', terminate_at_goal=True, init_pos_noise=init_pos_noise)
         # env = maze_model.SimpleTwoGoalsMazeEnv(goal=goal, reward_type='sparse', terminate_at_goal=True)
 
         def wrapped_reset():
@@ -77,9 +78,9 @@ def main(directory):
 
 
         if args.noisy:
-            fname = os.path.join(directory, '%s-%s-noisy.hdf5' % (env_name, goal))
+            fname = os.path.join(directory, f'%s-%s-noisy-initpos{init_pos_noise:.1f}.hdf5' % (env_name, goal))
         else:
-            fname = os.path.join(directory, '%s-%s.hdf5' % (env_name, goal))
+            fname = os.path.join(directory, f'%s-%s-initpos{init_pos_noise:.1f}.hdf5' % (env_name, goal))
         dataset = h5py.File(fname, 'w')
         npify(data)
         for k in data:
