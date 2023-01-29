@@ -10,6 +10,7 @@ import random
 WALL = 10
 EMPTY = 11
 GOAL = 12
+START = 13
 
 
 def parse_maze(maze_str):
@@ -25,6 +26,8 @@ def parse_maze(maze_str):
                 maze_arr[w][h] = GOAL
             elif tile == ' ' or tile == 'O' or tile == '0':
                 maze_arr[w][h] = EMPTY
+            elif tile == 'S':
+                maze_arr[w][h] = START
             else:
                 raise ValueError('Unknown tile type: %s' % tile)
     return maze_arr
@@ -210,9 +213,9 @@ SIMPLE_MULTI_GOAL = \
 SIMPLE_TWO_GOALS = \
         '#########\\'+\
         '#########\\'+\
-        '##OOOOO##\\'+\
-        '##OOOOO##\\'+\
-        '##OOOOO##\\'+\
+        '##SSSSS##\\'+\
+        '##SSSSS##\\'+\
+        '##SSSSS##\\'+\
         '##OOOOO##\\'+\
         '##OOOOO##\\'+\
         '##G###G##\\'+\
@@ -384,7 +387,7 @@ class FunnelGoalMazeEnv(MazeEnv):
         if start_loc is not None:
             self.reset_locations = [start_loc]
         else:
-            self.reset_locations = list(zip(*np.where(self.maze_arr == EMPTY)))
+            self.reset_locations = list(zip(*np.where(self.maze_arr == START)))
             self.reset_locations.sort()
 
 

@@ -23,7 +23,7 @@ def main(directory):
     max_episode_steps = env._max_episode_steps
 
     controller = waypoint_controller.WaypointController(maze)
-    init_pos_noise = 0.1
+    init_pos_noise = 0.4
 
     for goal in ['left', 'right']:
         print('goal', goal)
@@ -101,6 +101,6 @@ def main(directory):
 
 if __name__ == "__main__":
     import os
-    directory = '/data/maze2d'
+    directory = '/data/maze2d-initloc'
     os.makedirs(directory, exist_ok=True)
     main(directory)
